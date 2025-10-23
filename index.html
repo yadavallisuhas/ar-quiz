@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Markerless AR Quiz</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://aframe.io/releases/1.4.1/aframe.min.js"></script>
+  </head>
+  <body style="margin: 0; overflow: hidden;">
+    <a-scene
+      xr-mode-ui="enabled: true"
+      ar-mode-ui="enabled: true"
+      renderer="colorManagement: true;"
+      embedded
+    >
+      <!-- Transparent ground plane -->
+      <a-entity geometry="primitive: plane; width: 4; height: 4;"
+                rotation="-90 0 0"
+                material="color: #ccc; opacity: 0.1;"></a-entity>
+
+      <!-- Quiz Panel -->
+      <a-entity id="quizPanel" position="0 0 -2">
+        <a-plane color="#ffffff" height="1.2" width="2.2" shadow></a-plane>
+
+        <!-- Question Text -->
+        <a-text id="questionText" value="" color="#000" align="center"
+                position="0 0.35 0" width="2"></a-text>
+
+        <!-- Answer Buttons -->
+        <a-box id="optA" position="-0.6 0 0.1" depth="0.05" height="0.2" width="1"
+               color="#4CAF50" class="answer">
+          <a-text value="" align="center" position="0 0 0.06" color="#fff" width="2"></a-text>
+        </a-box>
+
+        <a-box id="optB" position="0.6 0 0.1" depth="0.05" height="0.2" width="1"
+               color="#2196F3" class="answer">
+          <a-text value="" align="center" position="0 0 0.06" color="#fff" width="2"></a-text>
+        </a-box>
+
+        <a-box id="optC" position="-0.6 -0.35 0.1" depth="0.05" height="0.2" width="1"
+               color="#FF9800" class="answer">
+          <a-text value="" align="center" position="0 0 0.06" color="#fff" width="2"></a-text>
+        </a-box>
+
+        <a-box id="optD" position="0.6 -0.35 0.1" depth="0.05" height="0.2" width="1"
+               color="#f44336" class="answer">
+          <a-text value="" align="center" position="0 0 0.06" color="#fff" width="2"></a-text>
+        </a-box>
+
+        <!-- Score Display -->
+        <a-text id="scoreText" value="Score: 0" color="#000"
+                align="center" position="0 -0.7 0" width="2"></a-text>
+      </a-entity>
+    </a-scene>
+
+    <script>
+      const questions = [
+        {
+          q: "What is the capital of France?",
+          options: ["Paris", "Berlin", "Rome", "Madrid"],
+          answer: "Paris"
+        },
+        {
+          q: "Which planet is known as the Red Planet?",
+          options: ["Venus", "Mars", "Jupiter", "Mercury"],
+          answer: "Mars"
+        },
+        {
+          q: "Who wrote 'Romeo and Juliet'?",
+          options: ["Shakespeare", "Hemingway", "Tolkien", "Dickens"],
+          answer: "Shakespeare"
+        }
+      ];
+
+      let current = 0;
+      let score = 0;
+
+      const questionText = document.getElementById('questionText');
+      const scoreText = document.getElementById('scoreText');
+      const answers = document.querySelectorAll('.answer');
+
+      function loadQuestion() {
+        if (current >= questions.length) {
+          questionText.setAttribute('value', `Quiz Over!\nYour Score: ${score}/${questions.length}`);
+          answers.forEach(a => a.setAttribute('visible', false));
+          scoreText.setAttribute('value', '');
+          return;
+        }
+
+        const q = questions[current];
+        questionText.setAttribute('value', `Q${current + 1}: ${q.q}`);
+
+        // Set options text
+        const ids = ['optA', 'optB', 'optC', 'optD'];
+        ids.forEach((id, i) => {
+          const box = document.getElementById(id);
+          const text = box.querySelector('a-text');
+          text.setAttribute('value', q.options[i]);
+          box.setAttribute('data-answer', q.options[i]);
+          box.setAttribute('visible', true);
+        });
+
+        scoreText.setAttribute('value', `Score: ${score}`);
+      }
+
+      answers.forEach(el => {
+        el.addEventListener('click', e => {
+          const ans = el.getAttribute('data-answer');
+          const correct = questions[current].answer;
+          if (ans === correct) score++;
+          current++;
+          loadQuestion();
+        });
+      });
+
+      loadQuestion();
+    </script>
+  </body>
+</html>
