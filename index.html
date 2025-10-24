@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Indian History AR Quiz 🇮🇳</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.min.js"></script>
+  </head>
+
+  <body style="margin: 0; overflow: hidden;">
+    <a-scene embedded arjs>
+      <!-- AR Marker -->
+      <a-marker preset="hiro" id="marker">
+
+        <!-- Question text -->
+        <a-text id="questionText"
+          value="Loading question..."
+          position="0 1 0"
+          align="center"
+          color="yellow"
+          width="4">
+        </a-text>
+
+        <!-- Answer options as clickable boxes -->
+        <a-box id="optionA" position="-1 0 0" color="red" depth="0.2" height="0.5" width="1" class="clickable"></a-box>
+        <a-text id="textA" value="A" position="-1 0.4 0" align="center" width="3"></a-text>
+
+        <a-box id="optionB" position="0 0 0" color="green" depth="0.2" height="0.5" width="1" class="clickable"></a-box>
+        <a-text id="textB" value="B" position="0 0.4 0" align="center" width="3"></a-text>
+
+        <a-box id="optionC" position="1 0 0" color="blue" depth="0.2" height="0.5" width="1" class="clickable"></a-box>
+        <a-text id="textC" value="C" position="1 0.4 0" align="center" width="3"></a-text>
+
+        <!-- Feedback text -->
+        <a-text id="feedbackText"
+          value=""
+          position="0 -0.8 0"
+          align="center"
+          color="white"
+          width="4">
+        </a-text>
+
+        <!-- Score display -->
+        <a-text id="scoreText"
+          value="Score: 0"
+          position="0 -1.2 0"
+          align="center"
+          color="cyan"
+          width="4">
+        </a-text>
+
+      </a-marker>
+      <a-entity camera></a-entity>
+    </a-scene>
+
+    <script>
+      // 🧠 Indian History Quiz Data
+      const quiz = [
+        {
+          question: "Who was the first Emperor of the Maurya Dynasty?",
+          options: { A: "Ashoka", B: "Chandragupta Maurya", C: "Bindusara" },
+          answer: "B"
+        },
+        {
+          question: "When did India get its Independence?",
+          options: { A: "1947", B: "1950", C: "1930" },
+          answer: "A"
+        },
+        {
+          question: "Who led the Dandi March in 1930?",
+          options: { A: "Sardar Patel", B: "Bhagat Singh", C: "Mahatma Gandhi" },
+          answer: "C"
+        },
+        {
+          question: "The Battle of Plassey was fought in which year?",
+          options: { A: "1757", B: "1857", C: "1764" },
+          answer: "A"
+        },
+        {
+          question: "Who was the first female ruler of Delhi?",
+          options: { A: "Nur Jahan", B: "Razia Sultana", C: "Ahilyabai Holkar" },
+          answer: "B"
+        }
+      ];
+
+      let currentQuestion = 0;
+      let score = 0;
+
+      const qText = document.getElementById("questionText");
+      const aText = document.getElementById("textA");
+      const bText = document.getElementById("textB");
+      const cText = document.getElementById("textC");
+      const feedback = document.getElementById("feedbackText");
+      const scoreText = document.getElementById("scoreText");
+      const optionA = document.getElementById("optionA");
+      const optionB = document.getElementById("optionB");
+      const optionC = document.getElementById("optionC");
+
+      // Load a question
+      function loadQuestion() {
+        const q = quiz[currentQuestion];
+        qText.setAttribute("value", q.question);
+        aText.setAttribute("value", `A) ${q.options.A}`);
+        bText.setAttribute("value", `B) ${q.options.B}`);
+        cText.setAttribute("value", `C) ${q.options.C}`);
+        feedback.setAttribute("value", "");
+        scoreText.setAttribute("value", `Score: ${score}`);
+
+        // Randomize box colors for more colorfulness
+        const colors = ['red', 'green', 'blue', 'yellow', 'purple', 'orange', 'pink', 'cyan', 'magenta', 'lime'];
+        optionA.setAttribute("color", colors[Math.floor(Math.random() * colors.length)]);
+        optionB.setAttribute("color", colors[Math.floor(Math.random() * colors.length)]);
+        optionC.setAttribute("color", colors[Math.floor(Math.random() * colors.length)]);
+      }
+
+      // Handle answer selection
+      function handleAnswer(clicked) {
+        const correct = quiz[currentQuestion].answer;
+        if (clicked === correct) {
+          feedback.setAttribute("value", "✅ Correct!");
+          feedback.setAttribute("color", "lime");
+          score++;
+          scoreText.setAttribute("value", `Score: ${score}`);
+          // Animate correct answer box
+          const clickedBox = document.getElementById(`option${clicked}`);
+          clickedBox.setAttribute("animation", "property: scale; to: 1.3 1.3 1.3; dur: 600; easing: easeInOutQuad");
+          setTimeout(() => clickedBox.setAttribute("animation", "property: scale; to: 1 1 1; dur: 600; easing: easeInOutQuad"), 600);
+        } else {
+          feedback.setAttribute("value", "❌ Wrong!");
+          feedback.setAttribute("color", "red");
+          // Animate wrong answer box
+          const clickedBox = document.getElementById(`option${clicked}`);
+          clickedBox.setAttribute("animation", "property: scale; to: 0.7 0.7 0.7; dur: 600; easing: easeInOutQuad");
+          setTimeout(() => clickedBox.setAttribute("animation", "property: scale; to: 1 1 1; dur: 600; easing: easeInOutQuad"), 600);
+        }
+
+        // Move to next question after 2.5 seconds
+        setTimeout(() => {
+          currentQuestion++;
+          if (currentQuestion < quiz.length) {
+            loadQuestion();
+          } else {
+            qText.setAttribute("value", "🎉 Quiz Complete!");
+            aText.setAttribute("value", "");
+            bText.setAttribute("value", "");
+            cText.setAttribute("value", "");
+            feedback.setAttribute("value", `Final Score: ${score}/${quiz.length} 🇮🇳`);
+            scoreText.setAttribute("value", "");
+          }
+        }, 2500);
+      }
+
+      // Add keyboard event listener for interaction
+      document.addEventListener('keydown', (event) => {
+        const key = event.key.toLowerCase();
+        if (key === 'a') handleAnswer('A');
+        else if (key === 'b') handleAnswer('B');
+        else if (key === 'c') handleAnswer('C');
+      });
+
+      // Initialize first question
+      loadQuestion();
+    </script>
+  </body>
+</html>
